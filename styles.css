@@ -37,6 +37,7 @@
     --primary-h: #0da2d1;
     --primary-c: #000; 
     --highlight: #d80140;
+    --secondary: #57053e;
     --bs-font-sans-serif: 'Pattanakarn', sans-serif;
 
 }
@@ -177,6 +178,21 @@ body {
     --bs-btn-disabled-color: var(--primary-c);
     --bs-btn-disabled-bg: var(--primary);
     --bs-btn-disabled-border-color: var(--primary);
+}
+
+/* =================== FAQ =================== */
+
+.accordion {
+    --bs-accordion-bg: var(--secondary);
+    --bs-accordion-color: var(--font-color);
+    --bs-accordion-btn-color: var(--font-color);
+    --bs-accordion-btn-focus-border-color: var(--font-color);
+    --bs-accordion-active-bg: var(--highlight);
+    --bs-accordion-active-color: var(--font-color);
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(216, 1, 64, 0.25);
+    --bs-border-color: var(--highlight);
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon);
 }
 
 /* =================== Countdown =================== */
