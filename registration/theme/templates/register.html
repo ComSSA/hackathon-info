@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block stylesheets %}
+  {{ super() }}
+  {% include "components/registration-2026-style.html" %}
+  {% include "components/signup-layout.html" %}
+{% endblock %}
+{% block content %}
+<div class="signup">
+  <header class="signup-header">
+    <div>
+      <p class="signup-kicker">27–29 November · Curtin University</p>
+      <h1>Register your interest</h1>
+      <p>Create an account, then create or join a team. Your place is confirmed separately by organisers.</p>
+    </div>
+    <img src="https://res.cloudinary.com/dec6mijn3/image/upload/v1789288436/Hackathon/hackathon2026/HackathonLogo_ffmtjj.png" alt="Cascade · ComSSA Hackathon 2026">
+  </header>
+  <section class="registration-card signup-card" aria-label="Registration form">
+    <div class="signup-top"><span>Your details are private to organisers.</span><span>Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></span></div>
+    {% include "components/errors.html" %}
+    {% with form = Forms.auth.RegistrationForm() %}
+    {% macro entry(field, title='', hint='', autocomplete='off') %}
+      {% if field.field_type is defined and field.field_type == 'boolean' %}
+      <div class="signup-check">
+        {{ field(class="form-check-input") }}
+        <label for="{{ field.id }}">{{ title or field.label.text }}{% if not field.flags.required %} <span class="signup-optional">(optional)</span>{% endif %}</label>
+      </div>
+      {% else %}
+      <div class="signup-field">
+        <label class="form-label" for="{{ field.id }}">{{ title or field.label.text }}</label>
+        {% if hint %}
+          {{ field(class="form-control", autocomplete=autocomplete, aria_describedby=field.id ~ '-hint') }}
+          <small id="{{ field.id }}-hint" class="form-text">{{ hint }}</small>
+        {% else %}
+          {{ field(class="form-control", autocomplete=autocomplete) }}
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endmacro %}
+    {% macro extra(label, title='', hint='', autocomplete='off') %}
+      {% for field in form.extra if field.label.text == label %}{{ entry(field, title, hint, autocomplete) }}{% endfor %}
+    {% endmacro %}
+    <form method="post" accept-charset="utf-8">
+      {{ form.nonce() }}
+      <fieldset class="signup-section">
+        <legend>About you</legend>
+        <div class="signup-grid">
+          {{ extra('Name', 'Name', '', 'name') }}
+          {{ extra('Phone', 'Phone', '', 'tel') }}
+          {{ extra('DOB', 'Date of birth', 'DD/MM/YYYY', 'bday') }}
+          {{ extra('Dietary Requirements?', 'Dietary requirements', 'Write “None” if you have no requirements.') }}
+        </div>
+      </fieldset>
+      <fieldset class="signup-section">
+        <legend>Your studies</legend>
+        <div class="signup-grid">
+          {{ extra('School', 'School / university') }}
+          {{ extra('School, TAFE or university', 'School / university') }}
+          {{ extra('Course and Year') }}
+          {{ extra('Student ID') }}
+          {{ extra('Current student', 'I am currently enrolled as a student') }}
+        </div>
+      </fieldset>
+      <fieldset class="signup-section">
+        <legend>Account &amp; Discord</legend>
+        <div class="signup-grid">
+          {{ entry(form.name, 'Username', '', 'username') }}
+          {{ entry(form.email, 'Email', '', 'email') }}
+          {{ entry(form.password, 'Password', '', 'new-password') }}
+          {{ extra('Discord Username') }}
+          {{ extra('Discord username', 'Discord Username') }}
+          {{ extra('Joined Discord?', 'I have joined the hackathon Discord') }}
+          <p class="signup-discord"><a href="https://discord.gg/pJTuy4f8F" target="_blank" rel="noopener">Join the Discord ↗</a> for updates and teammates.</p>
+        </div>
+      </fieldset>
+      {% set known = ['Name','Phone','DOB','Dietary Requirements?','School','School, TAFE or university','Course and Year','Student ID','Current student','Discord Username','Discord username','Joined Discord?'] %}
+      {% for field in form.extra if field.label.text not in known %}{{ entry(field, hint=field.description) }}{% endfor %}
+      {% if Configs.hackathon_terms_version %}
+        <input type="hidden" name="hackathon_terms_version" value="{{ Configs.hackathon_terms_version }}">
+        <p><a href="/terms" target="_blank" rel="noopener">Read the participation terms</a> before accepting.</p>
+      {% endif %}
+      {% if integrations.mlc() %}<p><a href="{{ url_for('auth.oauth_login') }}">Login with Major League Cyber</a></p>{% endif %}
+      <div class="signup-submit"><p>Next: create or join a team of 4–6.<br>Coming solo? Find teammates on Discord.</p>{{ form.submit(class="btn btn-primary", value="Create account") }}</div>
+    </form>
+    {% endwith %}
+  </section>
+</div>
+{% endblock %}

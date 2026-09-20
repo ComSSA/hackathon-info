@@ -1,0 +1,60 @@
+services:
+  ctfd:
+    image: ctfd/ctfd:3.8.7
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY}
+      DATABASE_URL: mysql+pymysql://ctfd:${DB_PASSWORD:?Set DB_PASSWORD}@db/ctfd
+      REDIS_URL: redis://cache:6379
+      WORKERS: "1"
+      REVERSE_PROXY: "1,1,1,1,0"
+      UPLOAD_FOLDER: /var/uploads
+      LOG_FOLDER: /var/log/CTFd
+      ACCESS_LOG: "-"
+      ERROR_LOG: "-"
+    volumes:
+      - ./theme:/opt/CTFd/CTFd/themes/hackathon:ro
+      - ./plugin:/opt/CTFd/CTFd/plugins/hackathon_registration:ro
+      - uploads:/var/uploads
+      - logs:/var/log/CTFd
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    mem_limit: 400m
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ctfd
+      MARIADB_USER: ctfd
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --innodb-buffer-pool-size=64M, --max-connections=30, --performance-schema=OFF]
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    mem_limit: 300m
+    logging: *logging
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: [redis-server, --maxmemory, 32mb, --maxmemory-policy, allkeys-lru]
+    mem_limit: 64m
+    logging: *logging
+volumes:
+  database:
+  uploads:
+  logs:
